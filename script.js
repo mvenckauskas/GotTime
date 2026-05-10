@@ -1,199 +1,162 @@
-const startingHours = 24;
+const dayHours = 24;
+const minutesPerSlot = 30;
+const totalSlots = (dayHours * 60) / minutesPerSlot;
 
-const starterRows = [
-  { purpose: "Sleep", deduct: 8 },
-  { purpose: "Eating", deduct: 3 },
-  { purpose: "Buffer", deduct: 1 },
-  { purpose: "Work", deduct: 8 },
+const starterBlocks = [
+  { name: "Sleep", hours: 8, color: "#312e81" },
+  { name: "Eating", hours: 3, color: "#f97316" },
+  { name: "Buffer", hours: 1, color: "#14b8a6" },
+  { name: "Work", hours: 8, color: "#2563eb" },
 ];
 
-let rows = structuredClone(starterRows);
+let blocks = structuredClone(starterBlocks);
 
-const rowsTable = document.querySelector("#rowsTable");
-const remainingNumber = document.querySelector("#remainingNumber");
+const form = document.querySelector("#blockForm");
+const blocksTable = document.querySelector("#blocksTable");
+const equation = document.querySelector("#equation");
+const plannedHours = document.querySelector("#plannedHours");
+const remainingHours = document.querySelector("#remainingHours");
+const plannedSlots = document.querySelector("#plannedSlots");
 const statusMessage = document.querySelector("#statusMessage");
+const timeline = document.querySelector("#timeline");
 const resetButton = document.querySelector("#resetButton");
-const addFinalRowButton = document.querySelector("#addFinalRowButton");
 
 function formatHours(hours) {
-  return Number.isInteger(hours) ? `${hours}` : `${Number(hours.toFixed(2))}`;
+  return Number.isInteger(hours) ? `${hours}` : `${hours.toFixed(1)}`;
 }
 
-function calculateRows() {
-  let previous = startingHours;
-
-  return rows.map((row) => {
-    const deduct = Number(row.deduct) || 0;
-    const remaining = previous - deduct;
-    const calculatedRow = {
-      ...row,
-      previous,
-      deduct,
-      remaining,
-    };
-
-    previous = remaining;
-    return calculatedRow;
-  });
+function blockSlots(hours) {
+  return Math.round((hours * 60) / minutesPerSlot);
 }
 
-function finalRemaining(calculatedRows) {
-  if (calculatedRows.length === 0) {
-    return startingHours;
-  }
+function textColorForBackground(hexColor) {
+  const red = Number.parseInt(hexColor.slice(1, 3), 16);
+  const green = Number.parseInt(hexColor.slice(3, 5), 16);
+  const blue = Number.parseInt(hexColor.slice(5, 7), 16);
+  const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
 
-  return calculatedRows[calculatedRows.length - 1].remaining;
+  return brightness > 150 ? "#172033" : "#ffffff";
 }
 
-function createInput({ label, value, type, step, min, className, index }) {
-  const input = document.createElement("input");
+function renderTable() {
+  blocksTable.innerHTML = "";
 
-  input.setAttribute("aria-label", label);
-  input.dataset.index = index;
-  input.type = type;
-  input.value = value;
-  input.className = className;
-
-  if (step) {
-    input.step = step;
-  }
-
-  if (min !== undefined) {
-    input.min = min;
-  }
-
-  return input;
-}
-
-function renderRows() {
-  const calculatedRows = calculateRows();
-  rowsTable.innerHTML = "";
-
-  calculatedRows.forEach((row, index) => {
-    const tableRow = document.createElement("tr");
-    const purposeCell = document.createElement("td");
-    const previousCell = document.createElement("td");
-    const deductCell = document.createElement("td");
-    const remainingCell = document.createElement("td");
+  blocks.forEach((block, index) => {
+    const row = document.createElement("tr");
+    const nameCell = document.createElement("td");
+    const swatch = document.createElement("span");
+    const hoursCell = document.createElement("td");
+    const slotsCell = document.createElement("td");
     const actionCell = document.createElement("td");
-    const purposeInput = createInput({
-      label: `Purpose for row ${index + 1}`,
-      value: row.purpose,
-      type: "text",
-      className: "purpose-input",
-      index,
-    });
-    const deductInput = createInput({
-      label: `Hours to deduct for row ${index + 1}`,
-      value: row.deduct,
-      type: "number",
-      step: "0.25",
-      min: "0",
-      className: "deduct-input",
-      index,
-    });
-    const addButton = document.createElement("button");
-    const removeButton = document.createElement("button");
+    const deleteButton = document.createElement("button");
 
-    previousCell.dataset.index = index;
-    previousCell.className = "previous-output";
-    previousCell.textContent = formatHours(row.previous);
-    remainingCell.dataset.index = index;
-    remainingCell.className = `remaining-output${row.remaining < 0 ? " negative" : ""}`;
-    remainingCell.textContent = formatHours(row.remaining);
+    swatch.className = "swatch";
+    swatch.style.background = block.color;
+    nameCell.append(swatch, block.name);
+    hoursCell.textContent = formatHours(block.hours);
+    slotsCell.textContent = blockSlots(block.hours);
+    deleteButton.className = "delete";
+    deleteButton.type = "button";
+    deleteButton.dataset.index = index;
+    deleteButton.textContent = "Remove";
+    actionCell.append(deleteButton);
+    row.append(nameCell, hoursCell, slotsCell, actionCell);
+    blocksTable.append(row);
+  });
+}
 
-    addButton.type = "button";
-    addButton.className = "small-button add-below";
-    addButton.dataset.index = index;
-    addButton.textContent = "Add row beneath";
+function renderSummary() {
+  const usedHours = blocks.reduce((total, block) => total + block.hours, 0);
+  const freeHours = dayHours - usedHours;
+  const equationParts = [`${dayHours}hr day`, ...blocks.map((block) => `- ${formatHours(block.hours)}hr ${block.name}`)];
 
-    removeButton.type = "button";
-    removeButton.className = "small-button remove-row";
-    removeButton.dataset.index = index;
-    removeButton.textContent = "Remove";
+  equation.textContent = `${equationParts.join(" ")} = ${formatHours(freeHours)}hr free`;
+  plannedHours.textContent = formatHours(usedHours);
+  remainingHours.textContent = formatHours(freeHours);
+  plannedSlots.textContent = blockSlots(usedHours);
 
-    purposeCell.append(purposeInput);
-    deductCell.append(deductInput);
-    actionCell.append(addButton, removeButton);
-    tableRow.append(purposeCell, previousCell, deductCell, remainingCell, actionCell);
-    rowsTable.append(tableRow);
+  statusMessage.classList.toggle("warning", freeHours < 0);
+  statusMessage.textContent = freeHours < 0
+    ? `You planned ${formatHours(Math.abs(freeHours))} more hours than fit in a day. Remove or shorten a block.`
+    : `You still have ${formatHours(freeHours)} hours, or ${blockSlots(freeHours)} half-hour blocks, to assign.`;
+}
+
+function buildSlotList() {
+  const slots = [];
+
+  blocks.forEach((block) => {
+    for (let index = 0; index < blockSlots(block.hours); index += 1) {
+      slots.push(block);
+    }
   });
 
-  renderSummary(calculatedRows);
+  while (slots.length < totalSlots) {
+    slots.push({ name: "Free", color: "#e2e8f0" });
+  }
+
+  return slots.slice(0, totalSlots);
 }
 
-function updateCalculatedCells() {
-  const calculatedRows = calculateRows();
+function slotLabel(index) {
+  const totalMinutes = index * minutesPerSlot;
+  const hours = Math.floor(totalMinutes / 60).toString().padStart(2, "0");
+  const minutes = (totalMinutes % 60).toString().padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
 
-  calculatedRows.forEach((row, index) => {
-    const previousCell = rowsTable.querySelector(`.previous-output[data-index="${index}"]`);
-    const remainingCell = rowsTable.querySelector(`.remaining-output[data-index="${index}"]`);
+function renderTimeline() {
+  timeline.innerHTML = "";
+  buildSlotList().forEach((block, index) => {
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    const slotName = document.createElement("strong");
+    const slotTime = document.createElement("small");
 
-    previousCell.textContent = formatHours(row.previous);
-    remainingCell.textContent = formatHours(row.remaining);
-    remainingCell.classList.toggle("negative", row.remaining < 0);
+    slot.style.background = block.color;
+    slot.style.color = textColorForBackground(block.color);
+    slotName.textContent = block.name;
+    slotTime.textContent = slotLabel(index);
+    slot.append(slotName, slotTime);
+    timeline.append(slot);
   });
-
-  renderSummary(calculatedRows);
 }
 
-function renderSummary(calculatedRows = calculateRows()) {
-  const remaining = finalRemaining(calculatedRows);
-
-  remainingNumber.textContent = formatHours(remaining);
-  statusMessage.classList.toggle("warning", remaining < 0);
-  statusMessage.textContent = remaining < 0
-    ? `You are ${formatHours(Math.abs(remaining))} hours over your 24-hour day.`
-    : `Start with ${startingHours} hours, deduct each row, and keep the final number above.`;
+function render() {
+  renderTable();
+  renderSummary();
+  renderTimeline();
 }
 
-function addRowAfter(index) {
-  rows.splice(index + 1, 0, { purpose: "New block", deduct: 0 });
-  renderRows();
-}
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(form);
+  const name = formData.get("taskName").trim();
+  const hours = Number(formData.get("taskHours"));
+  const color = formData.get("taskColor");
 
-rowsTable.addEventListener("input", (event) => {
-  const index = Number(event.target.dataset.index);
-
-  if (!Number.isInteger(index)) {
+  if (!name || !Number.isFinite(hours) || hours <= 0) {
     return;
   }
 
-  if (event.target.classList.contains("purpose-input")) {
-    rows[index].purpose = event.target.value;
-  }
-
-  if (event.target.classList.contains("deduct-input")) {
-    rows[index].deduct = Number(event.target.value);
-    updateCalculatedCells();
-  }
+  blocks.push({ name, hours, color });
+  form.reset();
+  document.querySelector("#taskHours").value = 1;
+  document.querySelector("#taskColor").value = "#4f46e5";
+  render();
 });
 
-rowsTable.addEventListener("click", (event) => {
-  const index = Number(event.target.dataset.index);
-
-  if (!Number.isInteger(index)) {
+blocksTable.addEventListener("click", (event) => {
+  if (!event.target.matches("button.delete")) {
     return;
   }
 
-  if (event.target.classList.contains("add-below")) {
-    addRowAfter(index);
-  }
-
-  if (event.target.classList.contains("remove-row")) {
-    rows.splice(index, 1);
-    renderRows();
-  }
-});
-
-addFinalRowButton.addEventListener("click", () => {
-  rows.push({ purpose: "New block", deduct: 0 });
-  renderRows();
+  blocks.splice(Number(event.target.dataset.index), 1);
+  render();
 });
 
 resetButton.addEventListener("click", () => {
-  rows = structuredClone(starterRows);
-  renderRows();
+  blocks = structuredClone(starterBlocks);
+  render();
 });
 
-renderRows();
+render();

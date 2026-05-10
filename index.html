@@ -10,52 +10,86 @@
     <header class="hero">
       <div>
         <p class="eyebrow">GotTime</p>
-        <h1>Deduct hours from your 24-hour day.</h1>
+        <h1>Build a 24-hour plan in 30-minute blocks.</h1>
         <p class="intro">
-          Build your personal time framework as a simple table. Each row starts
-          with the previous remaining hours, subtracts the hours you enter, and
-          shows what is left.
+          Add sleep, meals, work, projects, buffers, and free time. The planner
+          totals your day and shows how each choice changes the time you have left.
         </p>
       </div>
     </header>
 
     <main class="layout">
-      <section class="card planner" aria-labelledby="planner-heading">
+      <section class="card controls" aria-labelledby="settings-heading">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Planner table</p>
-            <h2 id="planner-heading">Daily deductions</h2>
+            <p class="eyebrow">Settings</p>
+            <h2 id="settings-heading">Your life blocks</h2>
           </div>
           <button id="resetButton" class="secondary" type="button">Reset example</button>
         </div>
 
+        <form id="blockForm" class="block-form">
+          <label>
+            Task / purpose
+            <input id="taskName" name="taskName" type="text" placeholder="Project time" required />
+          </label>
+          <label>
+            Hours per day
+            <input id="taskHours" name="taskHours" type="number" min="0.5" max="24" step="0.5" value="1" required />
+          </label>
+          <label>
+            Color
+            <input id="taskColor" name="taskColor" type="color" value="#4f46e5" />
+          </label>
+          <button type="submit">Add block</button>
+        </form>
+
         <div class="table-wrap">
-          <table class="deduction-table">
+          <table>
             <thead>
               <tr>
-                <th>Purpose</th>
-                <th>Previous hour count</th>
-                <th>Hours to deduct</th>
-                <th>Hours remaining</th>
+                <th>Block</th>
+                <th>Hours</th>
+                <th>30-min slots</th>
                 <th><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody id="rowsTable"></tbody>
+            <tbody id="blocksTable"></tbody>
           </table>
         </div>
-
-        <button id="addFinalRowButton" class="add-row" type="button">Add row at bottom</button>
       </section>
 
-      <aside class="card remaining-card" aria-labelledby="remaining-heading">
-        <p class="eyebrow">Time remaining</p>
-        <h2 id="remaining-heading">Your result</h2>
-        <div class="remaining-circle" aria-live="polite">
-          <span id="remainingNumber">24</span>
-          <small>hours left</small>
+      <section class="card summary" aria-labelledby="summary-heading">
+        <p class="eyebrow">Math</p>
+        <h2 id="summary-heading">Time remaining</h2>
+        <div class="equation" id="equation"></div>
+        <div class="stat-grid">
+          <div>
+            <span id="plannedHours">0</span>
+            <small>planned hours</small>
+          </div>
+          <div>
+            <span id="remainingHours">24</span>
+            <small>free hours</small>
+          </div>
+          <div>
+            <span id="plannedSlots">0</span>
+            <small>planned blocks</small>
+          </div>
         </div>
         <p id="statusMessage" class="status" role="status"></p>
-      </aside>
+      </section>
+
+      <section class="card timeline-card" aria-labelledby="timeline-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Schedule</p>
+            <h2 id="timeline-heading">48 half-hour blocks</h2>
+          </div>
+          <p class="hint">Each square is 30 minutes.</p>
+        </div>
+        <div id="timeline" class="timeline" aria-label="Daily timeline split into 30-minute blocks"></div>
+      </section>
     </main>
 
     <script src="script.js"></script>

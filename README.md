@@ -1,21 +1,19 @@
 # GotTime Planner
 
-GotTime is a beginner-friendly, browser-based planner for splitting a 24-hour day into a personal time framework. It starts with an example:
+GotTime is a beginner-friendly, browser-based planner for splitting a 24-hour day into 30-minute blocks. It starts with an example framework:
 
-- 24 hours in the day
-- subtract 8 hours of sleep
-- subtract 3 hours of eating
-- subtract 1 hour of buffer time
-- subtract 8 hours of work
-- end with 4 hours left
+- 8 hours of sleep
+- 3 hours of eating
+- 1 hour of buffer time
+- 8 hours of work
+- 4 hours of free time
 
-You can edit the table, enter fractional hours like `1.5` or `0.25`, remove rows, and add a new row beneath any existing row.
+You can add or remove blocks to experiment with different life settings, such as longer work days, dedicated project time, exercise, study, or extra buffer time.
 
 ## What you need to know first
 
-This project is a small website made from four main files that are visible at the top level of this repo:
+This project is a small website made from three main files:
 
-- `README.md` is this instruction file.
 - `index.html` is the page you open in a browser.
 - `styles.css` controls how the page looks.
 - `script.js` controls the planner behavior.
@@ -136,30 +134,6 @@ Ctrl + C
 
 That stops the local server.
 
-## How to use the planner table
-
-Each row follows this pattern:
-
-```text
-Previous hour count - Hours to deduct = Hours remaining
-```
-
-For example:
-
-```text
-24 - 8 = 16
-16 - 3 = 13
-13 - 1 = 12
-12 - 8 = 4
-```
-
-Use the table like this:
-
-1. Type a purpose, such as `Sleep`, `Work`, `Exercise`, or `Project`.
-2. Enter the number of hours to deduct. Fractions are okay, so `1.5` means 1 hour and 30 minutes.
-3. Click **Add row beneath** to insert a new row directly under that row.
-4. Watch the circle on the right. It shows one number: your final hours left.
-
 ## Common beginner problems
 
 ### “python3: command not found”
@@ -192,8 +166,8 @@ Refresh the browser. If that does not work, stop the server with `Ctrl + C`, sta
 
 ## How it works
 
-- The day starts with 24 hours.
-- Each row deducts a number of hours from the previous row's remaining time.
-- Fractional hours are allowed.
-- The summary circle shows the final number of hours left.
+- The day is always 24 hours.
+- Every block is rounded to 30-minute slots.
+- The summary shows the equation for your current day.
+- The timeline displays 48 squares, one for each 30-minute block.
 - If your plan is longer than 24 hours, the app warns you so you can adjust it.
