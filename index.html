@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GotTime Planner</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">GotTime</p>
+        <h1>Deduct hours from your 24-hour day.</h1>
+        <p class="intro">
+          Build your personal time framework as a simple table. Each row starts
+          with the previous remaining hours, subtracts the hours you enter, and
+          shows what is left.
+        </p>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card planner" aria-labelledby="planner-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Planner table</p>
+            <h2 id="planner-heading">Daily deductions</h2>
+          </div>
+          <button id="resetButton" class="secondary" type="button">Reset example</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="deduction-table">
+            <thead>
+              <tr>
+                <th>Purpose</th>
+                <th>Previous hour count</th>
+                <th>Hours to deduct</th>
+                <th>Hours remaining</th>
+                <th><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="rowsTable"></tbody>
+          </table>
+        </div>
+
+        <button id="addFinalRowButton" class="add-row" type="button">Add row at bottom</button>
+      </section>
+
+      <aside class="card remaining-card" aria-labelledby="remaining-heading">
+        <p class="eyebrow">Time remaining</p>
+        <h2 id="remaining-heading">Your result</h2>
+        <div class="remaining-circle" aria-live="polite">
+          <span id="remainingNumber">24</span>
+          <small>hours left</small>
+        </div>
+        <p id="statusMessage" class="status" role="status"></p>
+      </aside>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
